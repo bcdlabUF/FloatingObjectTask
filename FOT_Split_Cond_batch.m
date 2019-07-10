@@ -1,4 +1,9 @@
 function [] = FOT_Split_Cond_batch(filemat, pathToFiles)
+    % check for the filt folder and create it if it doesn't
+    % exist
+    if ~exist(strcat(pathToFiles, 'filt/'),'dir')
+        mkdir(strcat(pathToFiles, 'filt/'))
+    end
 
 for j = 1:size(filemat,1)
     subject_string = deblank(filemat(j,:));
@@ -29,7 +34,7 @@ for j = 1:size(filemat,1)
     
     EEG = pop_editset(EEG, 'setname', strcat(file,'_FOT_chan_elist_filt'));
     %save the filtered file
-    EEG = pop_saveset(EEG, 'filename', strcat(file, '_1_50_filt.set'))
+    EEG = pop_saveset(EEG, 'filename', strcat(pathToFiles, 'filt/', subject, '_1_50_filt.set'))
     
     % check for the Split_Condition folder and create it if it doesn't
     % exist

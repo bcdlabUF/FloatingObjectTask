@@ -28,15 +28,15 @@
 %--------------------------------------------------%
 
 clear
-cd '/Users/rabarry/Documents/BEES Study/Floating Objects/DATA_FILES/'
-filematALL = dir('BEES_POST_TEST_*.set'); % This loads a struct of files of a specific condition e.g. (Pre)    
+cd '/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/DATA_FILES/'
+filematALL = dir('BEES_POST_3*_Adult_FOT.set'); % This loads a struct of files of a specific condition e.g. (Pre)    
 filemat = {filematALL.name}'; % This takes the just the names from that struct and transposes the list so its in the correct format
-pathToFiles='/Users/rabarry/Documents/BEES Study/Floating Objects/'
+pathToFiles='/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/'
 
 FOT_Split_Cond_batch(filemat, pathToFiles);
 
 %--------------------------------------------------%
-%  PART 2: outer band of electrodes removed,       %
+%  PART 2: outer band of electrodes removed (if 1) %
 %          bad channel replacement and avg ref     %
 %          resulting files saved in                %
 %          pathToFiles/Split_Condition/CLEAN CHAN  %
@@ -44,11 +44,12 @@ FOT_Split_Cond_batch(filemat, pathToFiles);
 %          trial saved as interpvec_filename       %
 %--------------------------------------------------%
 
-cd '/Users/rabarry/Documents/BEES Study/Floating Objects/Split_Condition/'
-filematALLSplit = dir('BEES_POST_TEST_*.set'); % This loads a struct of files of a specific condition e.g. (Pre)    
+cd '/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/Split_Condition/'
+filematALLSplit = dir('BEES_POST_3*_Adult_FOT_*.set'); % This loads a struct of files of a specific condition e.g. (Pre)    
 filematSplit = {filematALLSplit.name}'; % This takes the just the names from that struct and transposes the list so its in the correct format
-pathToFilesSplit='/Users/rabarry/Documents/BEES Study/Floating Objects/Split_Condition/'
+pathToFilesSplit='/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/Split_Condition/'
 
-BEES_clean_data_batch(filematSplit, pathToFilesSplit);
+%(filemat, path, Remove outer band? 0 or 1)
+BEES_clean_data_batch(filematSplit, pathToFilesSplit,0);
 
-cd '/Users/rabarry/Documents/BEES Study/Floating Objects/Split_Condition/CLEAN CHAN/'
+cd '/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/Split_Condition/CLEAN CHAN/'

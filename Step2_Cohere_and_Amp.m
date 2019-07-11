@@ -1,6 +1,10 @@
 %% Compute coherence and powmean
 %-------------------------------------------------------------------%
-%   Enter the pattern you want to use for searching on line17       %
+%   ****NOTE: TAKES A VERY LONG TIME!!- 45MINS PER FILE!!***        %
+%                                                                   %
+%   Set your current directory (cd) on line 19                      %
+%                                                                   %
+%   Enter the pattern you want to use for searching on line 20      %
 %                                                                   %
 %   This script divides each trial into 1sec segments and flags     %
 %   and then removes segments greater than 1.5SD from median        %
@@ -14,6 +18,7 @@
 
 clear
 clc
+cd '/Users/BCDLAB1600/Desktop/BEES Study/ADULT/Floating Objects/Split_Condition/CLEAN CHAN'
 filematALL = dir('BEES_PRE_349_Adult_FOT_*_CLEAN.set'); % This loads a struct of files of a specific condition e.g. (Pre)    
 filemat = {filematALL.name}'; % This takes the just the names from that struct and transposes the list so its in the correct format
 pathToFiles = strcat(cd,'/');
@@ -77,7 +82,7 @@ pathToFiles = strcat(cd,'/');
     [outmat, F] = cohere_baby(datamat);
     t = toc
     
-    %calculates amplitude for each segment and creates and average
+    %calculates amplitude for each segment and creates an average
     for seg = 1:size(datamat,3); 
         if seg == 1; [powsum, phase, freqs] = FFT_spectrum(squeeze(datamat(:, :, seg)), 500);
         else powsum = powsum + FFT_spectrum(squeeze(datamat(:, :, seg)), 500);

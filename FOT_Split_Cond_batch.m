@@ -1,4 +1,4 @@
-function [] = FOT_Split_Cond_batch(filemat, pathToFiles)
+function [] = FOT_Split_Cond_batch(filemat, pathToFiles, dirFolder)
     % check for the filt folder and create it if it doesn't
     % exist
     if ~exist(strcat(pathToFiles, 'filt/'),'dir')
@@ -10,8 +10,8 @@ for j = 1:size(filemat,1)
     Csubject = char(subject_string);
     C = strsplit(Csubject,'.');
     subject = char(C(1,1));
-    file = strcat(pathToFiles, 'DATA_FILES/',subject)
-    filename = strcat(pathToFiles, 'DATA_FILES/',subject, '.set');
+    file = strcat(dirFolder,subject)
+    filename = strcat(dirFolder,subject, '.set');
     
     EEG = pop_loadset('filename', filename);
     EEG = pop_editset(EEG, 'setname', strcat(file, '_FOT_chan'));

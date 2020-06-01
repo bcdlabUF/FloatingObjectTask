@@ -19,10 +19,6 @@ clc % clear matlab command window
 %addpath(genpath('C:\Users\Berger\Documents\eeglab13_4_4b'));% enter the path of the EEGLAB folder in this line
 %addpath(genpath('C:\Users\Berger\Documents\eeglab13_4_4b'))
  
-% CondArray = {'task','fixation'};
-% [selectionIndex3, leftBlank] = listdlg('PromptString', 'Do you wan to process the task trials or fixation trials?:', 'SelectionMode', 'single', 'ListString', CondArray);
-% Cond= CondArray{selectionIndex3};
- 
 % 1. Enter the path of the folder that has the raw data to be analyzed
 rawdata_location = '/Volumes/Hard Drive/BEES fot/All set/';
  
@@ -54,31 +50,26 @@ highpass = 1; % High-pass frequency
 lowpass  = 30; % Low-pass frequency. We recommend low-pass filter at/below line noise frequency (see manuscript for detail)
  
 % 8. Are you processing task-related or resting-state EEG data?
-% task_eeg = 1; % 0 = resting, 1 = task
-% if strcmp(Cond,'task')
-%     task_event_markers = { 'cu04' 'iu02' 'un05' 'fa06' }; % enter all the event/condition markers
-% else
-%     task_event_markers = { 'fx07'};
-% end
-%  inmat3d = EEG.data; 
-%  % Go through data matrix trial by trial and identify noisy channels,
-%                 % replace those electrodes with the average of the closest 6, and 
-%                 % apply the average reference
-%                 for trial = 1:size(inmat3d,3)
-% 
-%                     %Get the data for one trial
-%                     trialdata2d = inmat3d(:, :, trial); 
+task_eeg = 1; % 0 = resting, 1 = task
+ if strcmp(Cond,'task')
+     task_event_markers = { 'cu04' 'iu02' 'un05' 'fa06' }; % enter all the event/condition markers
+ else
+     task_event_markers = { 'fx07'};
+ end
+  inmat3d = EEG.data; 
+% Go through data matrix trial by trial and identify noisy channels,
+%replace those electrodes with the average of the closest 6, and 
+%apply the average reference
+    for trial = 1:size(inmat3d,3)
+ 
+   %Get the data for one trial
+       trialdata2d = inmat3d(:, :, trial); 
  
 % 9. Do you want to epoch/segment your data?
-% epoch_data = 1; % 0 = NO (do not epoch), 1 = YES (epoch data)
-% if strcmp(Cond,'task')
-%     task_epoch_length = [-.2 10]; % epoch length in second
-% else
-%     task_epoch_length = [-.2 5];
-% end
-% rest_epoch_length = 0; % for resting EEG continuous data will be segmented into consecutive epochs of a specified length (here 2 second) by adding dummy events
-% overlap_epoch = 0;     % 0 = NO (do not create overlapping epoch), 1 = YES (50% overlapping epoch)
-% dummy_events ={'d10'}; % enter dummy events name
+ epoch_data = 0; % 0 = NO (do not epoch), 1 = YES (epoch data)
+ rest_epoch_length = 0; % for resting EEG continuous data will be segmented into consecutive epochs of a specified length (here 2 second) by adding dummy events
+ overlap_epoch = 0;     % 0 = NO (do not create overlapping epoch), 1 = YES (50% overlapping epoch)
+ dummy_events ={'d10'}; % enter dummy events name
  
 % 10. Do you want to remove/correct baseline?
 remove_baseline = 1; % 0 = NO (no baseline correction), 1 = YES (baseline correction)
@@ -92,15 +83,15 @@ volt_threshold = [-400 400]; % lower and upper threshold (in ?V)
 interp_epoch = 1; % 0 = NO, 1 = YES.
 frontal_channels = {'E21', 'E25', 'E14', 'E9', 'E15'}; % If you set interp_epoch = 1, enter the list of frontal channels to check (see manuscript for detail)
  
-% %13. Do you want to interpolate the bad channels that were removed from data?
-% interp_channels = 1; % 0 = NO (Do not interpolate), 1 = YES (interpolate missing channels)
-%  
-% % 14. Do you want to rereference your data?
-% rerefer_data = 1; % 0 = NO, 1 = YES
-% reref=[]; % Enter electrode name/s or number/s to be used for rereferencing
-% For channel name/s enter, reref = {'channel_name', 'channel_name'};
-% For channel name/s enter, reref = [channel_number, channel_number];
-% For average rereference enter, reref = []; default is average rereference
+%13. Do you want to interpolate the bad channels that were removed from data?
+ interp_channels = 0; % 0 = NO (Do not interpolate), 1 = YES (interpolate missing channels)
+  
+% 14. Do you want to rereference your data?
+ rerefer_data = 0; % 0 = NO, 1 = YES
+ reref=[]; % Enter electrode name/s or number/s to be used for rereferencing
+ For channel name/s enter, reref = {'channel_name', 'channel_name'};
+ For channel name/s enter, reref = [channel_number, channel_number];
+ For average rereference enter, reref = []; default is average rereference
  
 % 15. Do you want to save interim results?
 save_interim_result = 1; % 0 = NO (Do not save) 1 = YES (save interim results)
@@ -176,25 +167,25 @@ for subject=1:length(datafile_names)
     fprintf('\n\n\n*** Processing subject %d (%s) ***\n\n\n', subject, datafile_names{subject});
      
     %% STEP 1: Import EGI data file and relevant information
-%     EEG=mff_import([rawdata_location filesep datafile_names{subject}]);
+     EEG=mff_import([rawdata_location filesep datafile_names{subject}]);
     EEG = pop_loadset([rawdata_location filesep datafile_names{subject}]);
     EEG = eeg_checkset(EEG);
      
     % Edit this data import function and use appropriate plugin from EEGLAB
     % for non-.mff data. For example, to import biosemi data, use biosig plugin.
     % The example codes for 64 channels biosemi data:
-%     EEG = pop_biosig([rawdata_location, filesep, datafile_names{subject}]);
-%     EEG = eeg_checkset(EEG);
-%     EEG = pop_select( EEG,'nochannel', 65:72); % delete redundant channels
+     EEG = pop_biosig([rawdata_location, filesep, datafile_names{subject}]);
+     EEG = eeg_checkset(EEG);
+     EEG = pop_select( EEG,'nochannel', 65:72); % delete redundant channels
      
     %% STEP 2: Import channel locations -- already loaded if using a setfile
-%     EEG=pop_chanedit(EEG, 'load',{channel_locations 'filetype' 'autodetect'});
-%     EEG = eeg_checkset( EEG );
-%    
-%     % Check whether the channel locations were properly imported. The EEG signals and channel numbers should be same.
-%     if size(EEG.data, 1) ~= length(EEG.chanlocs)
-%         error('The size of the data does not match with channel numbers.');
-%     end
+     EEG=pop_chanedit(EEG, 'load',{channel_locations 'filetype' 'autodetect'});
+     EEG = eeg_checkset( EEG );
+    
+  % Check whether the channel locations were properly imported. The EEG signals and channel numbers should be same.
+     if size(EEG.data, 1) ~= length(EEG.chanlocs)
+         error('The size of the data does not match with channel numbers.');
+     end
      
     %% STEP 3: Adjust anti-aliasing and task related time offset
     if adjust_time_offset==1
@@ -227,14 +218,14 @@ for subject=1:length(datafile_names)
     end
      
     %% STEP 4: Change sampling rate -- already done if using .set file
-%     if down_sample==1
-%         if floor(sampling_rate) > EEG.srate
-%             error ('Sampling rate cannot be higher than recorded sampling rate');
-%         elseif floor(sampling_rate) ~= EEG.srate
-%             EEG = pop_resample( EEG, sampling_rate);
-%             EEG = eeg_checkset( EEG );
-%         end
-%     end
+     if down_sample==1
+         if floor(sampling_rate) > EEG.srate
+             error ('Sampling rate cannot be higher than recorded sampling rate');
+         elseif floor(sampling_rate) ~= EEG.srate
+             EEG = pop_resample( EEG, sampling_rate);
+             EEG = eeg_checkset( EEG );
+         end
+     end
 %% eventlist
     EEG  = pop_creabasiceventlist( EEG , 'AlphanumericCleaning', 'on', ...
         'BoundaryNumeric', { -99 }, 'BoundaryString', { 'boundary' } );
@@ -306,70 +297,70 @@ for subject=1:length(datafile_names)
     %% STEP 7: Run faster to find bad channels
     % First check whether reference channel (i.e. zeroed channels) is present in data
     % reference channel is needed to run faster
-%     ref_chan=[]; FASTbadChans=[]; all_chan_bad_FAST=0;
-%     ref_chan=find(any(EEG.data, 2)==0);
-%     if numel(ref_chan)>1
-%         error(['There are more than 1 zeroed channel (i.e. zero value throughout recording) in data.'...
-%             ' Only reference channel should be zeroed channel. Delete the zeroed channel/s which is not reference channel.']);
-%     elseif numel(ref_chan)==1
-%         list_properties = channel_properties(EEG, 1:EEG.nbchan, ref_chan); % run faster
-%         FASTbadIdx=min_z(list_properties);
-%         FASTbadChans=find(FASTbadIdx==1);
-%         FASTbadChans=FASTbadChans(FASTbadChans~=ref_chan);
-%         reference_used_for_faster{subject}={EEG.chanlocs(ref_chan).labels};
-%         EEG = pop_select( EEG,'nochannel', ref_chan);
-%         EEG = eeg_checkset(EEG);
-%         channels_analysed=EEG.chanlocs; % keep full channel locations to use later for interpolation of bad channels
-%     elseif numel(ref_chan)==0
-%         warning('Reference channel is not present in data. Cz channel will be used as reference channel.');
-%         ref_chan=find(strcmp({EEG.chanlocs.labels}, 'Cz')); % find Cz channel index
+     ref_chan=[]; FASTbadChans=[]; all_chan_bad_FAST=0;
+    ref_chan=find(any(EEG.data, 2)==0);
+     if numel(ref_chan)>1
+         error(['There are more than 1 zeroed channel (i.e. zero value throughout recording) in data.'...
+             ' Only reference channel should be zeroed channel. Delete the zeroed channel/s which is not reference channel.']);
+     elseif numel(ref_chan)==1
+         list_properties = channel_properties(EEG, 1:EEG.nbchan, ref_chan); % run faster
+         FASTbadIdx=min_z(list_properties);
+         FASTbadChans=find(FASTbadIdx==1);
+         FASTbadChans=FASTbadChans(FASTbadChans~=ref_chan);
+         reference_used_for_faster{subject}={EEG.chanlocs(ref_chan).labels};
+         EEG = pop_select( EEG,'nochannel', ref_chan);
+         EEG = eeg_checkset(EEG);
+         channels_analysed=EEG.chanlocs; % keep full channel locations to use later for interpolation of bad channels
+     elseif numel(ref_chan)==0
+         warning('Reference channel is not present in data. Cz channel will be used as reference channel.');
+         ref_chan=find(strcmp({EEG.chanlocs.labels}, 'Cz')); % find Cz channel index
         EEG_copy=[];
         EEG_copy=EEG; % make a copy of the dataset
-%         EEG_copy = pop_reref( EEG_copy, ref_chan,'keepref','on'); % rerefer to Cz in copied dataset
+         EEG_copy = pop_reref( EEG_copy, ref_chan,'keepref','on'); % rerefer to Cz in copied dataset
         EEG_copy = eeg_checkset(EEG_copy);
-%         list_properties = channel_properties(EEG_copy, 1:EEG_copy.nbchan, ref_chan); % run faster on copied dataset
-%         FASTbadIdx=min_z(list_properties);
-%         FASTbadChans=find(FASTbadIdx==1);
-%         channels_analysed=EEG.chanlocs;
-%         reference_used_for_faster{subject}={EEG.chanlocs(ref_chan).labels};
-%     end
-%      
-%     % If FASTER identifies all channels as bad channels, save the dataset
-%     % at this stage and ignore the remaining of the preprocessing.
-%     if numel(FASTbadChans)==EEG.nbchan || numel(FASTbadChans)+1==EEG.nbchan
-%         all_chan_bad_FAST=1;
-%         warning(['No usable data for datafile', datafile_names{subject}]);
-%         if output_format==1
-%             EEG = eeg_checkset(EEG);
-%             EEG = pop_editset(EEG, 'setname',  strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels'));
-%             EEG = pop_saveset(EEG, 'filename', strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.set'),'filepath', [output_location filesep 'processed_data' filesep ]); % save .set format
-%         elseif output_format==2
-%             save([[output_location filesep 'processed_data' filesep ] strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.mat')], 'EEG'); % save .mat format
-%         end
-%     else
-%         % Reject channels that are bad as identified by Faster
-%         EEG = pop_select( EEG,'nochannel', FASTbadChans);
-%         EEG = eeg_checkset(EEG);
-%     end
-%      
-%     if numel(FASTbadChans)==0
-%         faster_bad_channels{subject}='0';
-%     else
-%         faster_bad_channels{subject}=num2str(FASTbadChans');
-%     end
-%      
-%     if all_chan_bad_FAST==1
-%         faster_bad_channels{subject}='0';
-%         ica_preparation_bad_channels{subject}='0';
-%         length_ica_data(subject)=0;
-%         total_ICs(subject)=0;
-%         ICs_removed{subject}='0';
-%         total_epochs_before_artifact_rejection=0;
-%         total_epochs_after_artifact_rejection=0;
-%         total_channels_interpolated=0;
-%         continue % ignore rest of the processing and go to next subject
-%     end
-%      
+         list_properties = channel_properties(EEG_copy, 1:EEG_copy.nbchan, ref_chan); % run faster on copied dataset
+         FASTbadIdx=min_z(list_properties);
+         FASTbadChans=find(FASTbadIdx==1);
+         channels_analysed=EEG.chanlocs;
+         reference_used_for_faster{subject}={EEG.chanlocs(ref_chan).labels};
+     end
+      
+     % If FASTER identifies all channels as bad channels, save the dataset
+     % at this stage and ignore the remaining of the preprocessing.
+     if numel(FASTbadChans)==EEG.nbchan || numel(FASTbadChans)+1==EEG.nbchan
+         all_chan_bad_FAST=1;
+         warning(['No usable data for datafile', datafile_names{subject}]);
+         if output_format==1
+             EEG = eeg_checkset(EEG);
+             EEG = pop_editset(EEG, 'setname',  strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels'));
+             EEG = pop_saveset(EEG, 'filename', strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.set'),'filepath', [output_location filesep 'processed_data' filesep ]); % save .set format
+         elseif output_format==2
+             save([[output_location filesep 'processed_data' filesep ] strrep(datafile_names{subject}, ext, '_no_usable_data_all_bad_channels.mat')], 'EEG'); % save .mat format
+         end
+     else
+         % Reject channels that are bad as identified by Faster
+         EEG = pop_select( EEG,'nochannel', FASTbadChans);
+         EEG = eeg_checkset(EEG);
+     end
+      
+     if numel(FASTbadChans)==0
+         faster_bad_channels{subject}='0';
+     else
+         faster_bad_channels{subject}=num2str(FASTbadChans');
+     end
+      
+     if all_chan_bad_FAST==1
+         faster_bad_channels{subject}='0';
+         ica_preparation_bad_channels{subject}='0';
+         length_ica_data(subject)=0;
+         total_ICs(subject)=0;
+         ICs_removed{subject}='0';
+         total_epochs_before_artifact_rejection=0;
+         total_epochs_after_artifact_rejection=0;
+         total_channels_interpolated=0;
+        continue % ignore rest of the processing and go to next subject
+     end
+      
     %% Save data after running filter and FASTER function, if saving interim results was preferred
     if save_interim_result ==1
         if output_format==1
@@ -533,11 +524,11 @@ for subject=1:length(datafile_names)
     EEG_copy =eeg_regepochs(EEG_copy,'recurrence', 1, 'limits',[0 1], 'rmbase', [NaN], 'eventtype', '999'); % insert temporary marker 1 second apart and create epochs
     EEG_copy = eeg_checkset(EEG_copy);
      
-%     if save_interim_result==1
-%             badICs = adjusted_ADJUST(EEG_copy, [[output_location filesep 'ica_data' filesep] strrep(datafile_names{subject}, ext, '_adjust_report')]);
-%     else
-%             badICs = adjusted_ADJUST(EEG_copy, [[output_location filesep 'processed_data' filesep] strrep(datafile_names{subject}, ext, '_adjust_report')]);
-%     end
+     if save_interim_result==1
+             badICs = adjusted_ADJUST(EEG_copy, [[output_location filesep 'ica_data' filesep] strrep(datafile_names{subject}, ext, '_adjust_report')]);
+     else
+             badICs = adjusted_ADJUST(EEG_copy, [[output_location filesep 'processed_data' filesep] strrep(datafile_names{subject}, ext, '_adjust_report')]);
+     end
     close all;
         
     % Mark the bad ICs found by ADJUST
